@@ -9,10 +9,10 @@ This repo is a live arcade of [agno](https://github.com/agno-agi/agno) agents pl
 ## Disclaimers
 
 1. All scores are on the public demonstration set: 25 games, 183 levels. ARC-AGI-3's primary basis for evaluation is its private sets, which are harder, out-of-distribution, and not publicly playable; a score here says nothing about them. Nobody has beaten ARC-AGI-3 (as far as we know).
-2. The agent runs in two modes. Cold: no prior knowledge; the agent starts every game blank and builds learnings as it plays. Warm: the agent reuses the learnings from its previous runs to improve its performance.
+2. Agents run in two modes. Cold: no prior knowledge; the agent starts every game blank and builds learnings as it plays. Warm: the agent reuses the learnings from its previous runs to improve its performance.
 3. Agents can be powered by any model: Gemini, GPT, Claude, DeepSeek, Grok, Mistral, etc.
 4. Warm runs of one model can be seeded with the manuals of another model. This is how gemini-3.7-flash-seeded scored so well.
-5. Agents get a Python kernel (CodeMode) with real filesystem access, and given one, models will eventually use it broadly: we have observed agents reading a game's source code and human baselines, reading other models' manuals mid-run, and building offline copies of a game to search against — unprompted, across five different models. Runs where this happens are tagged CONTAMINATED on the leaderboard and generally excluded from competition claims.
+5. Agents get a Python kernel (CodeMode) with real filesystem access, and given one, models will eventually use it broadly: we have observed agents reading a game's source code and human baselines, reading other models' manuals mid-run, and building offline copies of a game to search against — unprompted, across five different models. Runs where this happens are flagged CONTAMINATED wherever they appear and generally excluded from competition claims.
 
 ## Notable Scores
 

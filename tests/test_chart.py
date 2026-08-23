@@ -74,7 +74,8 @@ def test_a_running_challenger_chases_without_a_row(tmp_path):
     )
     html = out.read_text()
     assert html.count('class="model"') == 1  # only the mint holds a row
-    assert html.count('<path d="M') == 2 and 'opacity="0.55"' in html  # but the chase is drawn
+    assert html.count('<path d="M') == 2  # but the chase is drawn, at full weight...
+    assert "GPT · CHASING" in html  # ...with its name on the curve tip
     assert any("chasing the mint" in line for line in summary)
 
 

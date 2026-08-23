@@ -223,18 +223,37 @@ def render(series: list[Series], out: Path, title: str) -> list[str]:
         f'<text x="{WIDTH - MR}" y="{base_y + 26}" class="base-label"'
         f' text-anchor="end">HUMAN BASELINE · {HUMAN_BASELINE}</text>'
     )
+    chasing_ids = {id(s) for s in chasing}
     for s in drawn:
-        # Draw the aggregate as a step path: score holds flat until the next completion lands. Lanes still
-        # climbing toward the board draw subordinate — thinner and translucent — until they earn a row.
-        listed = id(s) in ranked_ids
+        # Draw the aggregate as a step path: score holds flat until the next completion lands. A lane
+        # chasing a mint draws at full weight with its name on the curve tip — the continual-learning
+        # image is a rerun visibly closing on its own receipt. Ordinary lanes still climbing toward the
+        # board draw subordinate — thinner and translucent — until they earn a row.
+        listed, chase = id(s) in ranked_ids, id(s) in chasing_ids
         d = f"M {x(s['curve'][0][0]):.1f} {y(s['curve'][0][1]):.1f}"
         for (_, v0), (t1, v1) in zip(s["curve"], s["curve"][1:]):
             d += f" L {x(t1):.1f} {y(v0):.1f} L {x(t1):.1f} {y(v1):.1f}"
-        weight = 'stroke-width="3"' if listed else 'stroke-width="2" opacity="0.55"'
+        weight = (
+            'stroke-width="3"'
+            if listed
+            else ('stroke-width="3" opacity="0.8"' if chase else 'stroke-width="2" opacity="0.55"')
+        )
         svg.append(f'<path d="{d}" fill="none" stroke="{s["color"]}" {weight}/>')
         tf, vf = s["curve"][-1]
-        dot = 'r="6"' if listed else 'r="4" opacity="0.55"'
+        dot = 'r="6"' if listed else ('r="5" opacity="0.8"' if chase else 'r="4" opacity="0.55"')
         svg.append(f'<circle cx="{x(tf)}" cy="{y(vf)}" {dot} fill="{s["color"]}"/>')
+        if chase:
+            tip, anchor = (x(tf) + 12, "start") if x(tf) < WIDTH - MR - 220 else (x(tf) - 12, "end")
+            label = f"{s['spec'].model} · CHASING"
+            # Painted twice — a background-colored halo first — so the label reads over curve traffic.
+            svg.append(
+                f'<text x="{tip:.0f}" y="{y(vf) + 5}" class="chase" stroke="#0b0d0e" stroke-width="8"'
+                f' text-anchor="{anchor}">{label}</text>'
+            )
+            svg.append(
+                f'<text x="{tip:.0f}" y="{y(vf) + 5}" class="chase" fill="{s["color"]}"'
+                f' text-anchor="{anchor}">{label}</text>'
+            )
 
     # The legend is a leaderboard: the top 10 by board score, under a header row, flush with the plot edge.
     top = legend_top
@@ -283,6 +302,7 @@ def render(series: list[Series], out: Path, title: str) -> list[str]:
   .cap-label {{ fill: #5b8dd6; font-size: 18px; letter-spacing: 1px; }}
   .base {{ stroke: #4a5258; stroke-width: 2; stroke-dasharray: 4 7; }}
   .base-label {{ fill: #8b949b; font-size: 18px; letter-spacing: 1px; }}
+  .chase {{ font-size: 14px; font-weight: 700; letter-spacing: 1px; }}
   .axis {{ fill: #6b7480; font-size: 19px; letter-spacing: 3px; }}
   .panel {{ fill: #0b0d0e; fill-opacity: 0.78; stroke: #1d2226; stroke-width: 1; }}
   .head {{ fill: #6b7480; font-size: 12px; letter-spacing: 2px; }}
