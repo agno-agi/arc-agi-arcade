@@ -5,7 +5,7 @@ from json import dumps
 from arcade.chart import Series, render
 
 
-def bank(tmp_path, name, actions):
+def bank(tmp_path, name, actions, tok_per_action=100):
     """One run dir holding a 1-level game solved in `actions` actions against a baseline of 10:
     level score min((10/actions)^2, 1.15)*100, board score that divided by the 25-game board."""
     run = tmp_path / name
@@ -19,8 +19,8 @@ def bank(tmp_path, name, actions):
                     "n": n,
                     "state": "WIN" if done else "NOT_FINISHED",
                     "levels": 1 if done else 0,
-                    "tok_out": 100 * n,
-                    "tok_total": 100 * n,
+                    "tok_out": tok_per_action * n,
+                    "tok_total": tok_per_action * n,
                 }
             )
         )
@@ -49,6 +49,19 @@ def test_verified_run_keeps_its_row_on_a_tie(tmp_path):
         html = out.read_text()
         assert html.count('class="model"') == 1
         assert "VERIFIED" in html and "RUNNING" not in html
+
+
+def test_matching_a_score_cheaper_takes_the_row(tmp_path):
+    """Efficiency is the chart's other axis: an equal score bought with fewer tokens is a strictly
+    better run — it takes the row even from a VERIFIED incumbent (a mint of its own awaits it)."""
+    minted = bank(tmp_path, "minted", 10)
+    cheaper = bank(tmp_path, "cheaper", 10, tok_per_action=50)  # same score, half the tokens
+    out = tmp_path / "chart.html"
+    summary = render([Series(minted, "GPT", "WARM", tag="VERIFIED"), Series(cheaper, "GPT", "WARM")], out, "T")
+    html = out.read_text()
+    assert html.count('class="model"') == 1
+    assert "VERIFIED" not in html  # the cheaper run holds the row, unverified until minted
+    assert any("dropped GPT WARM" in line for line in summary)
 
 
 def test_contaminated_run_never_masks_a_clean_one(tmp_path):

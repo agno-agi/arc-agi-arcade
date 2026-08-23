@@ -13,8 +13,9 @@ score: who played, how (COLD / WARM), whose knowledge seeded the run (credit flo
 that wrote the manuals), the board score, the levels won, and a status tag.
 
 One run of one type per model draws: reruns keep their traces, but the board keeps only the best of
-them — the highest score, a VERIFIED (officially minted) run winning ties and never ceding its row
-or its status to a rerun that merely matches it.
+them — the highest score first, then the fewest tokens (an equal score bought cheaper is a strictly
+better run, and efficiency is this chart's other axis); a VERIFIED (officially minted) run wins what
+remains, so it never cedes its row or its status to a rerun that merely matches it.
 """
 
 from argparse import ArgumentParser
@@ -124,18 +125,19 @@ def render(series: list[Series], out: Path, title: str) -> list[str]:
 
     # One run of one type per model: reruns must not stack the board (a wall of one model's rows would
     # bury every other player). The type is (model, mode, seed), contaminated runs standing apart so a
-    # negative result never masks a clean one. The best score keeps the row; a VERIFIED run wins ties, so
-    # a minted result stays on the board — with its status — even while a rerun of the same type climbs.
+    # negative result never masks a clean one. The best run keeps the row: highest score, then fewest
+    # tokens — matching a score cheaper is beating it, and reruns chase efficiency — with VERIFIED
+    # winning pure ties, so a minted result never cedes its row or status to a rerun that merely equals it.
     def run_type(s: dict[str, Any]) -> tuple[str, str, str, bool]:
         return (s["spec"].model, s["spec"].mode, s["spec"].seed, s["spec"].tag == "CONTAMINATED")
+
+    def merit(s: dict[str, Any]) -> tuple[float, float, bool]:
+        return (s["curve"][-1][1], -s["curve"][-1][0], s["spec"].tag == "VERIFIED")
 
     best: dict[tuple[str, str, str, bool], dict[str, Any]] = {}
     for s in drawn:
         held = best.get(run_type(s))
-        if held is None or (s["curve"][-1][1], s["spec"].tag == "VERIFIED") > (
-            held["curve"][-1][1],
-            held["spec"].tag == "VERIFIED",
-        ):
+        if held is None or merit(s) > merit(held):
             best[run_type(s)] = s
     for s in drawn:
         if best[run_type(s)] is not s:
