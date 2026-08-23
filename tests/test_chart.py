@@ -87,6 +87,18 @@ def test_contaminated_run_never_masks_a_clean_one(tmp_path):
     assert "CONTAMINATED" in html
 
 
+def test_contaminated_lanes_never_crowd_clean_lanes_off_the_legend(tmp_path):
+    """Contaminated runs are exhibits, not competitors: whatever their score, they take only the
+    legend slots clean lanes leave open."""
+    series = [Series(bank(tmp_path, f"run{i}", 10 + i), f"M{i}", "COLD") for i in range(10)]
+    series.append(Series(bank(tmp_path, "tainted", 10), "TAINTED", "COLD", tag="CONTAMINATED"))
+    out = tmp_path / "chart.html"
+    render(series, out, "T")
+    html = out.read_text()
+    assert html.count('class="model"') == 10  # ten clean rows
+    assert "CONTAMINATED" not in html  # the top-scoring tainted lane still cedes its slot
+
+
 def test_settled_lanes_below_the_board_vanish_but_climbers_still_draw(tmp_path):
     """The chart draws its top 10 plus every RUNNING lane: a retired experiment can't silt up the board,
     but a live lane keeps its (subordinate) curve while it climbs toward a legend row."""

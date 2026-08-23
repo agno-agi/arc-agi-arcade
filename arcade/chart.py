@@ -158,8 +158,13 @@ def render(series: list[Series], out: Path, title: str) -> list[str]:
 
     # The board draws exactly what it ranks — the top 10 — plus every RUNNING lane: a live lane keeps its
     # curve while it climbs (drawn subordinate until it earns a legend row), but a settled lane below the
-    # board disappears entirely, so retired experiments can never silt up the chart.
-    ranked = sorted(board, key=lambda s: s["curve"][-1][1], reverse=True)[:LEGEND_TOP]
+    # board disappears entirely, so retired experiments can never silt up the chart. Contaminated lanes
+    # are exhibits, not competitors: excluded from claims, they take only the legend slots clean lanes
+    # leave open, whatever their score — a negative result must never crowd a clean run off the board.
+    ranked = sorted(board, key=lambda s: (s["spec"].tag != "CONTAMINATED", s["curve"][-1][1]), reverse=True)[
+        :LEGEND_TOP
+    ]
+    ranked.sort(key=lambda s: s["curve"][-1][1], reverse=True)  # rows still read purely by score
     ranked_ids = {id(s) for s in ranked}
     for s in board:
         if id(s) not in ranked_ids and s["spec"].tag != "RUNNING":
