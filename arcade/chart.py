@@ -245,14 +245,15 @@ def render(series: list[Series], out: Path, title: str) -> list[str]:
         svg.append(f'<circle cx="{x(tf)}" cy="{y(vf)}" {dot} fill="{s["color"]}"/>')
         if chase:
             tip, anchor = (x(tf) + 12, "start") if x(tf) < WIDTH - MR - 220 else (x(tf) - 12, "end")
+            tip_y = y(vf) + (28 if abs(y(vf) - y(HUMAN_BASELINE)) < 40 else 5)  # duck under the baseline caption
             label = f"{s['spec'].model} · CHASING"
             # Painted twice — a background-colored halo first — so the label reads over curve traffic.
             svg.append(
-                f'<text x="{tip:.0f}" y="{y(vf) + 5}" class="chase" stroke="#0b0d0e" stroke-width="8"'
+                f'<text x="{tip:.0f}" y="{tip_y}" class="chase" stroke="#0b0d0e" stroke-width="8"'
                 f' text-anchor="{anchor}">{label}</text>'
             )
             svg.append(
-                f'<text x="{tip:.0f}" y="{y(vf) + 5}" class="chase" fill="{s["color"]}"'
+                f'<text x="{tip:.0f}" y="{tip_y}" class="chase" fill="{s["color"]}"'
                 f' text-anchor="{anchor}">{label}</text>'
             )
 
