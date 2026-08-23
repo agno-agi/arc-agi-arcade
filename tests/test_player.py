@@ -2,6 +2,8 @@
 
 from json import dumps
 
+import pytest
+
 from arcade.player import Player
 
 
@@ -38,6 +40,22 @@ def test_win_needs_the_trace_not_just_the_summary(tmp_path, monkeypatch):
     bank(tmp_path, "bbbb", "WIN", header_game="zzzz")  # trace records a different game than the dir claims
     paths, missing = player.campaign_traces()
     assert paths == [] and missing == ["aaaa", "bbbb"]
+
+
+def test_cap_flag_overrides_the_player_cap(monkeypatch):
+    """--cap declares a per-run budget era on the command line; the player default holds without it."""
+    player = Player(model="gpt-5.6", cap=800)
+    seen = {}
+
+    def fake_play(self, games=None, cold=False, seed=None):
+        seen["cap"] = self.cap
+        return 0
+
+    monkeypatch.setattr(Player, "play", fake_play)
+    monkeypatch.setattr("sys.argv", ["play gpt", "--run", "x", "--cap", "2500"])
+    with pytest.raises(SystemExit):
+        player.main()
+    assert seen["cap"] == 2500
 
 
 def test_sweep_command_carries_agent_and_effort():

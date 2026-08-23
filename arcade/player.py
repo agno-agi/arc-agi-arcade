@@ -372,6 +372,13 @@ class Player:
         play.add_argument(
             "--run", metavar="NAME", help="name this outing: plays the whole board again into runs/player-<n>-NAME"
         )
+        play.add_argument(
+            "--cap",
+            type=int,
+            metavar="N",
+            help="per-game action cap for this run, shown in every trace's budget — the command is the"
+            " disclosure (default: the player's cap)",
+        )
         report = commands.add_parser("report", help="score the campaign so far")
         report.add_argument("games", nargs="*", help="subset of games (default: all)")
         compete = commands.add_parser(
@@ -394,6 +401,7 @@ class Player:
         if getattr(args, "cold", False) and getattr(args, "seed", None):
             parser.error("--cold and --seed contradict each other: cold means no knowledge at all")
         self.run = getattr(args, "run", None) or self.run  # every verb reads the same run
+        self.cap = getattr(args, "cap", None) or self.cap  # a per-run budget era, declared on the command line
         self._resolve_run(playing=args.command == "play")
         if args.command == "report":
             self.report(args.games or None)
