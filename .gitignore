@@ -1,0 +1,16 @@
+__pycache__/
+*.py[codz]
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.venv/
+.env
+environment_files/
+tmp/
+uv.lock
+runs/
+.claude/settings.local.json
+.DS_Store
+recordings/
+traces/
+knowledge/
