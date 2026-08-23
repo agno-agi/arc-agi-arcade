@@ -123,37 +123,51 @@ def render(series: list[Series], out: Path, title: str) -> list[str]:
         who = " · ".join(filter(None, (spec.model, spec.mode, f"seed {spec.seed}" if spec.seed else "", spec.tag)))
         summary.append(f"{who}: {len(games)} games · final {curve[-1][1]:.2f} @ {curve[-1][0]:,.0f} tok/game")
 
-    # One run of one type per model: reruns must not stack the board (a wall of one model's rows would
-    # bury every other player). The type is (model, mode, seed), contaminated runs standing apart so a
-    # negative result never masks a clean one. The best run keeps the row: highest score, then fewest
-    # tokens — matching a score cheaper is beating it, and reruns chase efficiency — with VERIFIED
-    # winning pure ties, so a minted result never cedes its row or status to a rerun that merely equals it.
+    # One run of one type per model — with two exceptions that ARE the story. The type is (model, mode,
+    # seed), contaminated runs standing apart so a negative result never masks a clean one. A VERIFIED
+    # run is a minted receipt: permanent, never displaced. Unverified reruns collapse to their best —
+    # highest score, then fewest tokens, because matching a score cheaper is beating it — and that
+    # challenger earns its own row BESIDE the mints only by beating every one of them: the old curve
+    # stays so the new curve's efficiency is visible against it. A RUNNING challenger that hasn't beaten
+    # the mints yet still draws, subordinate: the chase is worth watching, and only the chase.
     def run_type(s: dict[str, Any]) -> tuple[str, str, str, bool]:
         return (s["spec"].model, s["spec"].mode, s["spec"].seed, s["spec"].tag == "CONTAMINATED")
 
-    def merit(s: dict[str, Any]) -> tuple[float, float, bool]:
-        return (s["curve"][-1][1], -s["curve"][-1][0], s["spec"].tag == "VERIFIED")
+    def merit(s: dict[str, Any]) -> tuple[float, float]:
+        return (s["curve"][-1][1], -s["curve"][-1][0])
 
-    best: dict[tuple[str, str, str, bool], dict[str, Any]] = {}
+    minted = [s for s in drawn if s["spec"].tag == "VERIFIED"]
+    challenger: dict[tuple[str, str, str, bool], dict[str, Any]] = {}
     for s in drawn:
-        held = best.get(run_type(s))
+        if s["spec"].tag == "VERIFIED":
+            continue
+        held = challenger.get(run_type(s))
         if held is None or merit(s) > merit(held):
-            best[run_type(s)] = s
+            challenger[run_type(s)] = s
+    board, chasing = list(minted), []
+    for key, s in challenger.items():
+        receipts = [v for v in minted if run_type(v) == key]
+        if all(merit(s) > merit(v) for v in receipts):
+            board.append(s)
+        elif s["spec"].tag == "RUNNING":
+            chasing.append(s)
+    kept_ids = {id(s) for s in (*board, *chasing)}
     for s in drawn:
-        if best[run_type(s)] is not s:
+        if id(s) not in kept_ids:
             summary.append(f"one run per type: dropped {s['spec'].model} {s['spec'].mode} at {s['curve'][-1][1]:.2f}")
-    drawn = [s for s in drawn if best[run_type(s)] is s]
 
     # The board draws exactly what it ranks — the top 10 — plus every RUNNING lane: a live lane keeps its
     # curve while it climbs (drawn subordinate until it earns a legend row), but a settled lane below the
     # board disappears entirely, so retired experiments can never silt up the chart.
-    ranked = sorted(drawn, key=lambda s: s["curve"][-1][1], reverse=True)[:LEGEND_TOP]
+    ranked = sorted(board, key=lambda s: s["curve"][-1][1], reverse=True)[:LEGEND_TOP]
     ranked_ids = {id(s) for s in ranked}
-    for s in drawn:
+    for s in board:
         if id(s) not in ranked_ids and s["spec"].tag != "RUNNING":
             summary.append(f"off the board: {s['spec'].model} {s['spec'].mode} at {s['curve'][-1][1]:.2f} (settled)")
-    drawn = [s for s in drawn if id(s) in ranked_ids or s["spec"].tag == "RUNNING"]
+    drawn = [s for s in board if id(s) in ranked_ids or s["spec"].tag == "RUNNING"] + chasing
     climbers = [s for s in drawn if id(s) not in ranked_ids]
+    for s in chasing:
+        summary.append(f"chasing the mint: {s['spec'].model} {s['spec'].mode} at {s['curve'][-1][1]:.2f} (running)")
     for s, color in zip((*ranked, *climbers), cycle(COLORS)):
         s["color"] = color  # rank order claims the palette: the legend reads as the first ten colors
     if not drawn:

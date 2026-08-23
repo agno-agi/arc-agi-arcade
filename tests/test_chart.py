@@ -51,17 +51,31 @@ def test_verified_run_keeps_its_row_on_a_tie(tmp_path):
         assert "VERIFIED" in html and "RUNNING" not in html
 
 
-def test_matching_a_score_cheaper_takes_the_row(tmp_path):
-    """Efficiency is the chart's other axis: an equal score bought with fewer tokens is a strictly
-    better run — it takes the row even from a VERIFIED incumbent (a mint of its own awaits it)."""
+def test_beating_a_mint_earns_a_row_beside_it(tmp_path):
+    """A minted run is permanent — and a rerun that beats it (equal score, fewer tokens) earns its own
+    row NEXT to it, not instead of it: successive runs shifting left at equal score is the continual-
+    learning exhibit, and it only reads if the earlier curve stays on the board."""
     minted = bank(tmp_path, "minted", 10)
     cheaper = bank(tmp_path, "cheaper", 10, tok_per_action=50)  # same score, half the tokens
     out = tmp_path / "chart.html"
-    summary = render([Series(minted, "GPT", "WARM", tag="VERIFIED"), Series(cheaper, "GPT", "WARM")], out, "T")
+    render([Series(minted, "GPT", "WARM", tag="VERIFIED"), Series(cheaper, "GPT", "WARM")], out, "T")
     html = out.read_text()
-    assert html.count('class="model"') == 1
-    assert "VERIFIED" not in html  # the cheaper run holds the row, unverified until minted
-    assert any("dropped GPT WARM" in line for line in summary)
+    assert html.count('class="model"') == 2  # the receipt and the run that beat it, side by side
+    assert "VERIFIED" in html  # the mint keeps its badge
+
+
+def test_a_running_challenger_chases_without_a_row(tmp_path):
+    """A live rerun that hasn't beaten the mint yet draws subordinate — visible chasing, no row."""
+    minted = bank(tmp_path, "minted", 10)
+    chaser = bank(tmp_path, "chaser", 20, tok_per_action=50)  # worse score so far, still running
+    out = tmp_path / "chart.html"
+    summary = render(
+        [Series(minted, "GPT", "WARM", tag="VERIFIED"), Series(chaser, "GPT", "WARM", tag="RUNNING")], out, "T"
+    )
+    html = out.read_text()
+    assert html.count('class="model"') == 1  # only the mint holds a row
+    assert html.count('<path d="M') == 2 and 'opacity="0.55"' in html  # but the chase is drawn
+    assert any("chasing the mint" in line for line in summary)
 
 
 def test_contaminated_run_never_masks_a_clean_one(tmp_path):
