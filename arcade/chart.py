@@ -45,7 +45,7 @@ HUMAN_BASELINE = 95.4  # ARC's published expert aggregate for the public set (ci
 # ~11px, and the widest cells are a 17-character name and a 7-character seed. The legend ranks the
 # top 10; every series past that keeps its curve but cedes its legend row.
 DOT_X, COL_MODEL, COL_MODE, COL_SEED = ML + 26, ML + 46, ML + 250, ML + 346
-COL_SCORE, COL_LEVELS, COL_TOK, COL_TAG = ML + 486, ML + 502, ML + 642, ML + 662
+COL_SCORE, COL_LEVELS, COL_TAG = ML + 486, ML + 502, ML + 600
 # 15px legend text advances ~11px per character; the 13px status chips advance ~8.8px — sizing a chip
 # with the wrong advance leaves it trailing dead padding on the right.
 CHAR_W, TAG_CHAR_W, LEGEND_ROW, LEGEND_TOP = 11, 8.8, 22, 10
@@ -265,7 +265,6 @@ def render(series: list[Series], out: Path, title: str) -> list[str]:
         (COL_SEED, "SEED", "start"),
         (COL_SCORE, "RHAE", "end"),
         (COL_LEVELS, "LEVELS", "start"),
-        (COL_TOK, "TOKENS", "end"),
         (COL_TAG, "STATUS", "start"),
     ):
         legend.append(f'<text x="{x_pos}" y="{top + 28}" class="head" text-anchor="{anchor}">{label}</text>')
@@ -281,15 +280,6 @@ def render(series: list[Series], out: Path, title: str) -> list[str]:
             f' text-anchor="end">{s["curve"][-1][1]:.2f}</text>'
         )
         legend.append(f'<text x="{COL_LEVELS}" y="{row}" class="levels">{s["levels"]}</text>')
-        # The tokens a run's board cost — the number that separates generations of the same run type:
-        # two minted 100s differ only here, and the gap between them is the learning made visible.
-        tokens = s["curve"][-1][0]
-        spent = (
-            f"{tokens / 1e6:.1f}M"
-            if tokens >= 1e6
-            else (f"{tokens / 1e3:.0f}k" if tokens >= 10_000 else f"{tokens:,.0f}")
-        )
-        legend.append(f'<text x="{COL_TOK}" y="{row}" class="levels" text-anchor="end">{spent}</text>')
         if spec.tag:
             text_color, chip = TAGS.get(spec.tag, NEUTRAL_TAG)
             legend.append(
