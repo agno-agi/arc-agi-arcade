@@ -347,7 +347,13 @@ class Player:
 
         out = self.out_dir / "chart.html"
         live = self._campaign_pid() is not None
-        series = Series(self.out_dir, self.handle, seed=", ".join(self.seeds).upper(), tag="RUNNING" if live else "")
+        series = Series(
+            self.out_dir,
+            self.handle,
+            seed=", ".join(self.seeds).upper(),
+            tag="RUNNING" if live else "",
+            run=self.run or "",
+        )
         for line in render([series], out, f"AGNO · {self.handle} · SCOREBOARD"):
             console.print(line)
 

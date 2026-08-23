@@ -44,8 +44,8 @@ HUMAN_BASELINE = 95.4  # ARC's published expert aggregate for the public set (ci
 # chip. Columns are hand-placed rather than measured: at 15px with 1px tracking a character advances
 # ~11px, and the widest cells are a 17-character name and a 7-character seed. The legend ranks the
 # top 10; every series past that keeps its curve but cedes its legend row.
-DOT_X, COL_MODEL, COL_MODE, COL_SEED = ML + 26, ML + 46, ML + 250, ML + 330
-COL_SCORE, COL_LEVELS, COL_TOK, COL_TAG = ML + 490, ML + 506, ML + 660, ML + 680
+DOT_X, COL_MODEL, COL_MODE, COL_SEED = ML + 26, ML + 46, ML + 250, ML + 346
+COL_SCORE, COL_LEVELS, COL_TOK, COL_TAG = ML + 486, ML + 502, ML + 642, ML + 662
 # 15px legend text advances ~11px per character; the 13px status chips advance ~8.8px — sizing a chip
 # with the wrong advance leaves it trailing dead padding on the right.
 CHAR_W, TAG_CHAR_W, LEGEND_ROW, LEGEND_TOP = 11, 8.8, 22, 10
@@ -67,9 +67,10 @@ class Series:
 
     run_dir: Path
     model: str
-    mode: str = ""  # COLD · WARM
+    mode: str = ""  # COLD · WARM — the run's semantic type (drives one-run-per-type)
     seed: str = ""  # the model whose knowledge seeded the run, e.g. GPT-5.6
     tag: str = ""  # VERIFIED · RUNNING · CONTAMINATED · CANCELED · anything short
+    run: str = ""  # the run id shown on the board (warm-2, cold-1, seeded-1); mode shows when unnamed
 
 
 def game_steps(header: dict[str, Any], steps: list[dict[str, Any]]) -> list[tuple[int, float]]:
@@ -273,7 +274,7 @@ def render(series: list[Series], out: Path, title: str) -> list[str]:
         spec, color = s["spec"], s["color"]
         legend.append(f'<circle cx="{DOT_X}" cy="{row - 5}" r="6" fill="{color}"/>')
         legend.append(f'<text x="{COL_MODEL}" y="{row}" class="model">{spec.model}</text>')
-        legend.append(f'<text x="{COL_MODE}" y="{row}" class="mode">{spec.mode}</text>')
+        legend.append(f'<text x="{COL_MODE}" y="{row}" class="mode">{spec.run or spec.mode}</text>')
         legend.append(f'<text x="{COL_SEED}" y="{row}" class="mode">{spec.seed}</text>')
         legend.append(
             f'<text x="{COL_SCORE}" y="{row}" class="score" fill="{color}"'
