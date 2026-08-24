@@ -9,7 +9,7 @@ from arcade.player import Player
 player = Player(
     name="glm-5.2",
     model="accounts/fireworks/models/glm-5p2",
-    knowledge="glm-5.2",
+    knowledge="glm-5.2-seeded",
     seeds=["gpt-5.6"],
     vision=False,
 )

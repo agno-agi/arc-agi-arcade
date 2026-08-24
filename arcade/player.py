@@ -42,7 +42,7 @@ class Player:
     effort: str | None = None  # reasoning-depth override for the model lane (see arcade.models.get_model)
     vision: bool = True  # False: text-only observations (the hex grid is authoritative anyway)
     jobs: int = 4
-    cap: int = 800
+    cap: int = 2500  # the full-game era: 5x baseline exceeds this on no public game's winning line
     retries: int = 2
     timeout: float = 28_800
     cycles: int = 6  # relaunch-until-done bound: a run that keeps dying stops burning money eventually
@@ -107,7 +107,9 @@ class Player:
                 remaining.append(game)
                 continue
             summary = loads(path.read_text())
-            if summary["state"] != "WIN" and summary["actions"] < summary["budget"]:
+            # The stored budget is the era the game last played under; a raised cap reopens games the
+            # old era closed. The runner still enforces min(5 x baseline, cap) — over-picking is a no-op.
+            if summary["state"] != "WIN" and summary["actions"] < max(summary["budget"], self.cap):
                 remaining.append(game)
         return remaining
 
@@ -376,8 +378,8 @@ class Player:
             "--cap",
             type=int,
             metavar="N",
-            help="per-game action cap for this run, shown in every trace's budget — the command is the"
-            " disclosure (default: the player's cap)",
+            help="per-game action cap for this run, recorded in every round's summary budget — the command"
+            " is the disclosure (default: the player's cap)",
         )
         report = commands.add_parser("report", help="score the campaign so far")
         report.add_argument("games", nargs="*", help="subset of games (default: all)")

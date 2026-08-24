@@ -83,8 +83,8 @@ A fresh `--run NAME` plays the whole board from the start, an existing run resum
 **The action budget.** A game's budget is 5× its human baseline, capped per run as a cost guard. Runs up to
 and including `warm-2` and `seeded-1` used a flat 800-action cap — which, we later measured, was the binding
 constraint on all 25 games, stricter than the documented rule everywhere. From `warm-3` and `seeded-2` onward
-the cap is declared on the command line (`--cap 2500`) and recorded in every trace's budget field, so each
-run carries its own rule. Raising it cannot inflate a score: RHAE scores a level `min((baseline/actions)², 1.15)`,
+the cap is a per-run declaration — `--cap` on the command line, 2500 by default — recorded in every
+round's summary, so each run carries its own rule. Raising it cannot inflate a score: RHAE scores a level `min((baseline/actions)², 1.15)`,
 so every action above baseline costs points — a bigger budget converts failures into low-scoring wins.
 
 **What a run may know.** Manuals are written by agents in play, never by hand. Human baselines are never shown
