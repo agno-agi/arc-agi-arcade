@@ -165,7 +165,9 @@ def render(series: list[Series], out: Path, title: str) -> list[str]:
     ranked = sorted(board, key=lambda s: (s["spec"].tag != "CONTAMINATED", s["curve"][-1][1]), reverse=True)[
         :LEGEND_TOP
     ]
-    ranked.sort(key=lambda s: s["curve"][-1][1], reverse=True)  # rows still read purely by score
+    # Rows read by merit, same as the one-per-type rule: score first, then the cheaper run — two perfect
+    # boards are not a tie, and the one that spent less belongs above the one that spent more.
+    ranked.sort(key=lambda s: (s["curve"][-1][1], -s["curve"][-1][0]), reverse=True)
     ranked_ids = {id(s) for s in ranked}
     for s in board:
         if id(s) not in ranked_ids and s["spec"].tag != "RUNNING":

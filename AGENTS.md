@@ -22,6 +22,7 @@ stays private for the same reason a trace does. Keep it small — no framework o
 python play.py                          # the players, their records, and every command
 python play.py setup                    # download the 25 public games (ARC_API_KEY; no model tokens)
 python play.py opus --run day1          # the whole board as the Opus player (every outing is named)
+python play.py gpt --run day2 --cap 2500    # --cap declares this run's action budget era on the command line
 python play.py gpt lf52 --cold --run lab    # one game, no prior knowledge (the agent still learns as it plays)
 python play.py opus --seed gpt-5.6 --run x  # warm: own manuals merged with another model's knowledge
 python play.py gpt report               # score / draw / mint: report | chart | compete (YES-gated, one shot)
