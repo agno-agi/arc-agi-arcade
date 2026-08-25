@@ -5,7 +5,7 @@ description = "ARC-AGI-3 player built with Agno."
 requires-python = ">=3.12,<3.13"
 readme = "README.md"
 dependencies = [
-  "agno[openai,anthropic,google,mistral,code,sqlite]==3.0.0a3",
+  "agno[openai,anthropic,google,mistral,code,sqlite]==3.0.0",
   "arc-agi==0.9.9",
   "arcengine==0.9.3",
   "pillow==12.3.0",
