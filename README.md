@@ -26,7 +26,7 @@ Here are the top ten runs on the board. Verified runs link to their official ARC
 | GPT-5.6 Sol | warm-2 | 94.81 | 179/183 | 7,601 | [`1a9d9073`](https://arcprize.org/scorecards/1a9d9073-2e8d-4fec-a750-d60f7c57bbe6) |
 | Grok-4.6 · seeded GPT-5.6 | seeded-1 | 89.31 | 168/183 | 8,032 | [`a656c871`](https://arcprize.org/scorecards/a656c871-c31a-4052-8c9e-212c1e26d473) |
 | Gemini-3.7-Flash · seeded GPT-5.6 | seeded-1 | 88.78 | 168/183 | 7,648 | [`fcd78df3`](https://arcprize.org/scorecards/fcd78df3-6295-4e37-bd7e-387c5ddc13b3) |
-| GLM-5.2 · seeded GPT-5.6 | seeded-1 | 83.46 | 163/183 | 12,787 | _still playing_ |
+| GLM-5.2 · seeded GPT-5.6 | seeded-1 | 83.46 | 163/183 | 13,222 | _still playing_ |
 | Claude-Opus-5 · seeded GPT-5.6 | seeded-1 | 59.13 | 122/183 | 2,946 | _still playing_ |
 | DeepSeek-V4-Flash · seeded GPT-5.6 | seeded-1 | 50.10 | 106/183 | 2,773 | _stopped, unminted_ |
 
